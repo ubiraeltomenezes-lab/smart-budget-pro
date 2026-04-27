@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Budget Pro - Final</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #eef2ff;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text-main);
+            padding: 20px 20px 80px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app { width: 100%; max-width: 480px; }
+
+        .header-area { text-align: center; margin-bottom: 25px; }
+        h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+        #mes-atual-topo { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
+
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        #data-atual-box { padding: 12px; font-weight: 700; font-size: 0.9rem; color: var(--primary); background: var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #e0e7ff; }
+
+        input { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 15px; }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; width: 100%; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
+        #btn-voz { background: var(--warning); display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        .btn-clear { background: #fee2e2; color: var(--danger); border: none; padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+
+        .progress-container { background: #e2e8f0; height: 10px; border-radius: 5px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { background: var(--success); height: 100%; width: 0%; transition: 0.5s; }
+
+        .gasto-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 10px; background: #f1f5f9; margin-bottom: 8px; }
+        .btn-del { color: var(--danger); background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-left: 10px; }
+
+        .total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1rem; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+
+        /* NAVEGAÇÃO */
+        .nav-tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
+        .tab-item { cursor: pointer; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .tab-item.active { color: var(--primary); }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        /* ESTILO TELA 2 */
+        .dia-grupo { margin-bottom: 25px; }
+        .dia-titulo { font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; padding-bottom: 5px; border-bottom: 2px solid var(--primary-light); }
+        .dia-soma-label { color: var(--danger); font-weight: 800; }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="header-area">
+            <h1>Diário de Gastos</h1>
+            <div id="mes-atual-topo">...</div>
+        </div>
+
+        <section id="aba-registro" class="content-section active">
+            <div class="card">
+                <h3>Novo Gasto</h3>
+                <div class="grid">
+                    <div id="data-atual-box">...</div>
+                    <input type="number" id="valor" placeholder="R$ 0,00">
+                </div>
+                <input type="text" id="desc" placeholder="Ex: Padaria, Posto...">
+                <button id="btn-voz" class="btn">🎤 Falar Gasto</button>
+                <button class="btn" onclick="adicionarGasto()">Registrar Agora</button>
+            </div>
+
+            <div class="card">
+                <h3>
+                    Histórico Semanal
+                    <button class="btn-clear" onclick="limparTudo()">LIMPAR TUDO</button>
+                </h3>
+                <div class="progress-container">
+                    <div id="progresso" class="progress-bar"></div>
+                </div>
+                <div id="lista" style="max-height: 250px; overflow-y: auto;"></div>
+                <div class="total">
+                    <span>total gasto</span>
+                    <span id="soma">R$ 0,00</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="aba-historico" class="content-section">
+            <div class="card">
+                <h3 style="margin-bottom: 20px;">Relatório do mês</h3>
+                <div id="historico-agrupado"></div>
+            </div>
+        </section>
+
+        <nav class="nav-tabs">
+            <div class="tab-item active" onclick="mudarAba('aba-registro', this)">
+                <span>🏠</span><span>Início</span>
+            </div>
+            <div class="tab-item" onclick="mudarAba('aba-historico', this)">
+                <span>📊</span><span>Histórico</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+        const metaSemanal = 1000;
+        const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+        function mudarAba(id, el) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+            if(id === 'aba-historico') renderizarHistoricoAgrupado();
+        }
+       // Lógica de Voz revisada para Celular
+const btnVoz = document.getElementById('btn-voz');
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.continuous = false; // Importante para mobile
+    recognition.interimResults = false;
+
+    btnVoz.onclick = () => {
+        try {
+            recognition.start();
+            btnVoz.innerText = "⏳ Ouvindo...";
+            btnVoz.style.background = "#ef4444"; // Fica vermelho enquanto ouve
+        } catch (e) {
+            console.log("Erro ao iniciar: ", e);
+        }
+    };
+
+    recognition.onresult = (e) => {
+        const texto = e.results[0][0].transcript.toLowerCase();
+        btnVoz.innerText = "🎤 Falar Gasto";
+        btnVoz.style.background = "var(--warning)";
+        processarComandoVoz(texto);
+    };
+
+    recognition.onspeechend = () => {
+        recognition.stop(); // Garante que fecha o microfone no celular
+        btnVoz.innerText = "🎤 Falar Gasto";
+        btnVoz.style.background = "var(--warning)";
+    };
+
+    recognition.onerror = (event) => {
+        btnVoz.innerText = "🎤 Falar Gasto";
+        btnVoz.style.background = "var(--warning)";
+        if(event.error === 'not-allowed') {
+            alert("⚠️ Você precisa permitir o microfone nas configurações do navegador!");
+        }
+    };
+}
+        
+
+        function adicionarGasto() {
+            const v = document.getElementById('valor');
+            const d = document.getElementById('desc');
+            if (!v.value || !d.value) return;
+
+            const novo = {
+                id: Date.now(),
+                dataFull: new Date().toLocaleDateString('pt-BR'),
+                diaNome: diasSemana[new Date().getDay()],
+                valor: parseFloat(v.value),
+                desc: d.value.trim()
+            };
+
+            gastos.unshift(novo);
+            v.value = ''; d.value = '';
+            atualizarInterface();
+        }
+
+        function excluirGasto(id) {
+            gastos = gastos.filter(g => g.id !== id);
+            atualizarInterface();
+            renderizarHistoricoAgrupado();
+        }
+
+        function limparTudo() {
+            if(confirm("Deseja apagar todos os registros?")) {
+                gastos = [];
+                localStorage.removeItem('gastos');
+                atualizarInterface();
+                renderizarHistoricoAgrupado();
+            }
+        }
+
+        function atualizarInterface() {
+            const lista = document.getElementById('lista');
+            let total = 0;
+            lista.innerHTML = '';
+
+            gastos.forEach(g => {
+                total += g.valor;
+                // Ajuste para exibir registros antigos se as chaves novas não existirem
+                const diaExibir = g.diaNome || "Registro";
+                const dataExibir = g.dataFull || "Anterior";
+
+                lista.innerHTML += `
+                    <div class="gasto-item">
+                        <div>
+                            <strong style="font-size: 0.7rem; color: var(--primary)">${diaExibir} (${dataExibir})</strong><br>
+                            <span>${g.desc}</span>
+                        </div>
+                        <div style="display:flex; align-items:center">
+                            <span style="font-weight:600">R$ ${g.valor.toFixed(2)}</span>
+                            <button class="btn-del" onclick="excluirGasto(${g.id})">&times;</button>
+                        </div>
+                    </div>`;
+            });
+
+            document.getElementById('soma').innerText = `R$ ${total.toFixed(2)}`;
+            const perc = Math.min((total / metaSemanal) * 100, 100);
+            const barra = document.getElementById('progresso');
+            barra.style.width = perc + '%';
+            barra.style.background = total > metaSemanal ? 'var(--danger)' : 'var(--success)';
+            
+            localStorage.setItem('gastos', JSON.stringify(gastos));
+        }
+
+        function renderizarHistoricoAgrupado() {
+            const container = document.getElementById('historico-agrupado');
+            container.innerHTML = '';
+
+            if (gastos.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px;">Nenhum gasto registrado.</p>';
+                return;
+            }
+
+            const grupos = {};
+            gastos.forEach(g => {
+                // CORREÇÃO: Se o registro não tiver data, chamamos de "Histórico Antigo"
+                const chaveData = g.dataFull || "Anterior ao Update";
+                const chaveDia = g.diaNome || "Registro";
+
+                if (!grupos[chaveData]) {
+                    grupos[chaveData] = { itens: [], somaDia: 0, nomeDia: chaveDia };
+                }
+                grupos[chaveData].itens.push(g);
+                grupos[chaveData].somaDia += g.valor;
+            });
+
+            for (const data in grupos) {
+                const grupo = grupos[data];
+                let itensHtml = grupo.itens.map(i => `
+                    <div class="gasto-item" style="background: white; border: 1px solid #f1f5f9; margin-bottom: 5px;">
+                        <span style="font-size: 0.9rem;">${i.desc}</span>
+                        <strong style="font-size: 0.9rem;">R$ ${i.valor.toFixed(2)}</strong>
+                    </div>
+                `).join('');
+
+                container.innerHTML += `
+                    <div class="dia-grupo">
+                        <div class="dia-titulo">
+                            <span>${grupo.nomeDia}, ${data}</span>
+                            <span class="dia-soma-label">R$ ${grupo.somaDia.toFixed(2)}</span>
+                        </div>
+                        ${itensHtml}
+                    </div>
+                `;
+            }
+        }
+
+        const agora = new Date();
+        const nomeMes = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(agora);
+        document.getElementById('mes-atual-topo').innerText = nomeMes + " " + agora.getFullYear();
+        document.getElementById('data-atual-box').innerText = diasSemana[agora.getDay()];
+        atualizarInterface();
+    </script>
+</body>
+</html>
