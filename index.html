@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Budget Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -23,7 +23,7 @@
         body {
             background: var(--bg);
             color: var(--text-main);
-            padding: 20px 20px 80px 20px;
+            padding: 20px 20px 100px 20px;
             display: flex;
             justify-content: center;
         }
@@ -47,38 +47,37 @@
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         #data-atual-box { padding: 12px; font-weight: 700; font-size: 0.9rem; color: var(--primary); background: var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #e0e7ff; }
 
-        input { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 15px; background: #fff; color: #000; }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; width: 100%; font-weight: 700; cursor: pointer; margin-bottom: 10px; transition: 0.3s; }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; width: 100%; font-weight: 700; cursor: pointer; margin-bottom: 10px; font-size: 1rem; }
         
-        /* Botão de voz pulsando */
         #btn-voz { background: var(--warning); display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .ouvindo { background: var(--danger) !important; animation: pulse 1s infinite; }
+        .ouvindo { background: var(--danger) !important; animation: pulse 0.8s infinite; }
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(0.96); }
             100% { transform: scale(1); }
         }
 
         .btn-clear { background: #fee2e2; color: var(--danger); border: none; padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
 
         .progress-container { background: #e2e8f0; height: 10px; border-radius: 5px; margin: 15px 0; overflow: hidden; }
-        .progress-bar { background: var(--success); height: 100%; width: 0%; transition: 0.5s; }
+        .progress-bar { background: var(--success); height: 100%; width: 0%; transition: 0.8s; }
 
         .gasto-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 10px; background: #f1f5f9; margin-bottom: 8px; }
-        .btn-del { color: var(--danger); background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-left: 10px; }
+        .btn-del { color: var(--danger); background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 5px 10px; }
 
-        .total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1rem; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+        .total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.1rem; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
 
-        .nav-tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
+        .nav-tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.08); z-index: 999; }
         .tab-item { cursor: pointer; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .tab-item.active { color: var(--primary); }
         .content-section { display: none; }
         .content-section.active { display: block; }
 
         .dia-grupo { margin-bottom: 25px; }
-        .dia-titulo { font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; padding-bottom: 5px; border-bottom: 2px solid var(--primary-light); }
+        .dia-titulo { font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--primary-light); padding-bottom: 5px; }
     </style>
 </head>
 
@@ -96,7 +95,7 @@
                     <div id="data-atual-box">...</div>
                     <input type="number" id="valor" placeholder="R$ 0,00" inputmode="decimal">
                 </div>
-                <input type="text" id="desc" placeholder="Ex: Padaria, Posto...">
+                <input type="text" id="desc" placeholder="O que você comprou?">
                 <button id="btn-voz" class="btn">🎤 Falar Gasto</button>
                 <button class="btn" onclick="adicionarGasto()">Registrar Agora</button>
             </div>
@@ -109,9 +108,9 @@
                 <div class="progress-container">
                     <div id="progresso" class="progress-bar"></div>
                 </div>
-                <div id="lista" style="max-height: 250px; overflow-y: auto;"></div>
+                <div id="lista" style="max-height: 300px; overflow-y: auto;"></div>
                 <div class="total">
-                    <span>total gasto</span>
+                    <span>Total</span>
                     <span id="soma">R$ 0,00</span>
                 </div>
             </div>
@@ -147,7 +146,6 @@
             if(id === 'aba-historico') renderizarHistoricoAgrupado();
         }
 
-        // LÓGICA DE VOZ MELHORADA PARA CELULAR
         const btnVoz = document.getElementById('btn-voz');
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
@@ -158,9 +156,12 @@
             recognition.continuous = false;
 
             btnVoz.onclick = () => {
-                recognition.start();
-                btnVoz.innerText = "⏳ Gravando...";
-                btnVoz.classList.add('ouvindo');
+                try {
+                    recognition.start();
+                    btnVoz.innerText = "⏳ Ouvindo...";
+                    btnVoz.classList.add('ouvindo');
+                    if (navigator.vibrate) navigator.vibrate(50); // Vibra ao iniciar
+                } catch(e) { recognition.stop(); }
             };
 
             recognition.onresult = (e) => {
@@ -172,43 +173,43 @@
                 btnVoz.innerText = "🎤 Falar Gasto";
                 btnVoz.classList.remove('ouvindo');
             };
-
-            recognition.onerror = (event) => {
-                console.error(event.error);
-                btnVoz.innerText = "🎤 Falar Gasto";
-                btnVoz.classList.remove('ouvindo');
-            };
         }
 
         function processarComandoVoz(texto) {
-            // Tenta achar números
+            // Regex melhorada para capturar o valor
             const matchValor = texto.match(/\d+([.,]\d+)?/);
             if (matchValor) {
                 let v = matchValor[0].replace(',', '.');
                 let d = texto.replace(matchValor[0], '')
-                             .replace(/reais|real|no|na|em|com|de/g, '')
+                             .replace(/reais|real|no|na|em|com|de|o/g, '')
                              .trim();
 
                 document.getElementById('valor').value = v;
                 document.getElementById('desc').value = d.charAt(0).toUpperCase() + d.slice(1);
                 
-                // No celular é melhor não usar confirm, vamos apenas preencher e avisar
-                btnVoz.innerText = "✅ Entendido!";
-                setTimeout(() => btnVoz.innerText = "🎤 Falar Gasto", 2000);
+                // SALVAMENTO AUTOMÁTICO APÓS 1.2 SEGUNDOS
+                btnVoz.innerText = "✅ Entendido! Salvando...";
+                setTimeout(() => {
+                    adicionarGasto();
+                    btnVoz.innerText = "🎤 Falar Gasto";
+                }, 1200);
             }
         }
 
         function adicionarGasto() {
             const v = document.getElementById('valor');
             const d = document.getElementById('desc');
-            if (!v.value || !d.value) return;
+            const valorVal = parseFloat(v.value);
+            const descVal = d.value.trim();
+
+            if (!valorVal || descVal === "") return;
 
             const novo = {
                 id: Date.now(),
                 dataFull: new Date().toLocaleDateString('pt-BR'),
                 diaNome: diasSemana[new Date().getDay()],
-                valor: parseFloat(v.value),
-                desc: d.value.trim()
+                valor: valorVal,
+                desc: descVal
             };
 
             gastos.unshift(novo);
@@ -223,7 +224,7 @@
         }
 
         function limparTudo() {
-            if(confirm("Deseja apagar todos os registros?")) {
+            if(confirm("Deseja apagar tudo?")) {
                 gastos = [];
                 atualizarInterface();
                 renderizarHistoricoAgrupado();
@@ -264,10 +265,9 @@
             container.innerHTML = '';
             const grupos = {};
             gastos.forEach(g => {
-                const chaveData = g.dataFull || "Anterior";
-                const chaveDia = g.diaNome || "Registro";
+                const chaveData = g.dataFull;
                 if (!grupos[chaveData]) {
-                    grupos[chaveData] = { itens: [], somaDia: 0, nomeDia: chaveDia };
+                    grupos[chaveData] = { itens: [], somaDia: 0, nomeDia: g.diaNome };
                 }
                 grupos[chaveData].itens.push(g);
                 grupos[chaveData].somaDia += g.valor;
@@ -277,8 +277,8 @@
                 const grupo = grupos[data];
                 let itensHtml = grupo.itens.map(i => `
                     <div class="gasto-item" style="background: white; border: 1px solid #f1f5f9; margin-bottom: 5px;">
-                        <span style="font-size: 0.9rem;">${i.desc}</span>
-                        <strong style="font-size: 0.9rem;">R$ ${i.valor.toFixed(2)}</strong>
+                        <span>${i.desc}</span>
+                        <strong>R$ ${i.valor.toFixed(2)}</strong>
                     </div>
                 `).join('');
 
