@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Budget Pro</title>
+    <title>Smart Budget Pro - V2</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -19,123 +19,120 @@
         }
 
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
-
-        body {
-            background: var(--bg);
-            color: var(--text-main);
-            padding: 20px 20px 100px 20px;
-            display: flex;
-            justify-content: center;
-        }
-
+        body { background: var(--bg); color: var(--text-main); padding: 20px 20px 120px 20px; display: flex; justify-content: center; }
         .app { width: 100%; max-width: 480px; }
 
         .header-area { text-align: center; margin-bottom: 25px; }
         h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
-        #mes-atual-topo { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
+        #mes-atual-topo { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
 
-        .card {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-
-        h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-        #data-atual-box { padding: 12px; font-weight: 700; font-size: 0.9rem; color: var(--primary); background: var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #e0e7ff; }
-
-        input { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 15px; background: #fff; color: #000; }
-
-        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; width: 100%; font-weight: 700; cursor: pointer; margin-bottom: 10px; font-size: 1rem; }
+        .card { background: var(--card); border-radius: 24px; padding: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 20px; }
         
-        #btn-voz { background: var(--warning); display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .ouvindo { background: var(--danger) !important; animation: pulse 0.8s infinite; }
+        .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        h3 { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
+        .badge-dia { background: var(--primary-light); color: var(--primary); padding: 4px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.96); }
-            100% { transform: scale(1); }
+        input { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 14px; font-size: 1rem; outline: none; background: #fff; margin-bottom: 12px; }
+        input:focus { border-color: var(--primary); }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-weight: 700; cursor: pointer; margin-top: 8px; font-size: 1rem; }
+        #btn-voz { background: var(--warning); display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
+        
+        /* AJUSTE: BARRA DE ROLAGEM NA LISTA */
+        #lista { 
+            max-height: 320px; /* Tamanho fixo do card */
+            overflow-y: auto;  /* Ativa o scroll */
+            padding-right: 5px;
         }
 
-        .btn-clear { background: #fee2e2; color: var(--danger); border: none; padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+        /* Estilização da barra de rolagem para ficar discreta */
+        #lista::-webkit-scrollbar { width: 4px; }
+        #lista::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 
-        .progress-container { background: #e2e8f0; height: 10px; border-radius: 5px; margin: 15px 0; overflow: hidden; }
+        .gasto-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 18px; background: #f8fafc; margin-bottom: 10px; border: 1px solid #f1f5f9; }
+        .gasto-info { display: flex; flex-direction: column; }
+        .gasto-label-dia { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
+        .gasto-desc { font-weight: 600; color: var(--text-main); font-size: 1rem; line-height: 1.2; text-transform: lowercase; }
+        .gasto-valor { font-weight: 800; color: var(--primary); font-size: 0.95rem; margin-top: 2px; }
+
+        .progress-container { background: #e2e8f0; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
         .progress-bar { background: var(--success); height: 100%; width: 0%; transition: 0.8s; }
 
-        .gasto-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 10px; background: #f1f5f9; margin-bottom: 8px; }
-        .btn-del { color: var(--danger); background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 5px 10px; }
+        .btn-del { color: #cbd5e1; background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 10px; }
 
-        .total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.1rem; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+        /* Estilo do Fechamento Semanal */
+        .semana-grupo { margin-bottom: 25px; }
+        .semana-header { background: var(--primary); color: white; padding: 12px 18px; border-radius: 16px; font-weight: 800; font-size: 0.85rem; display: flex; justify-content: space-between; margin-bottom: 15px; }
 
-        .nav-tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.08); z-index: 999; }
-        .tab-item { cursor: pointer; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .nav-tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px 15px 30px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 1000; }
+        .tab-item { cursor: pointer; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .tab-item.active { color: var(--primary); }
         .content-section { display: none; }
         .content-section.active { display: block; }
 
-        .dia-grupo { margin-bottom: 25px; }
-        .dia-titulo { font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--primary-light); padding-bottom: 5px; }
+        .meta-container { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); }
+        .meta-edit { display: flex; align-items: center; gap: 5px; }
+        .meta-edit input { width: 70px; padding: 4px 8px; margin: 0; font-size: 0.75rem; font-weight: 800; border: 1px solid #e2e8f0; border-radius: 6px; text-align: right; }
     </style>
 </head>
-
 <body>
     <div class="app">
         <div class="header-area">
-            <h1>Smart Budget Pro</h1>
+            <h1>Smart Budget</h1>
             <div id="mes-atual-topo">...</div>
         </div>
 
         <section id="aba-registro" class="content-section active">
             <div class="card">
-                <h3>Novo Gasto</h3>
-                <div class="grid">
-                    <div id="data-atual-box">...</div>
-                    <input type="number" id="valor" placeholder="R$ 0,00" inputmode="decimal">
+                <div class="card-header-flex">
+                    <h3>Novo Gasto</h3>
+                    <span class="badge-dia" id="dia-semana-topo">...</span>
                 </div>
-                <input type="text" id="desc" placeholder="O que você comprou?">
+                
+                 <input type="text" id="desc" placeholder="O que você comprou?">
+                <input type="number" id="valor" placeholder="R$ 0,00" inputmode="decimal">
+               
                 <button id="btn-voz" class="btn">🎤 Falar Gasto</button>
-                <button class="btn" onclick="adicionarGasto()">Registrar Agora</button>
+                <button class="btn" onclick="adicionarGasto()">Salvar Gasto</button>
             </div>
 
             <div class="card">
-                <h3>
-                    Histórico Semanal
-                    <button class="btn-clear" onclick="limparTudo()">LIMPAR TUDO</button>
-                </h3>
-                <div class="progress-container">
-                    <div id="progresso" class="progress-bar"></div>
+                <div class="meta-container">
+                    <h3>Gastos Recentes</h3>
+                    <div class="meta-edit">
+                        <span>LIMITE: R$</span>
+                        <input type="number" id="meta-valor" value="1000" onchange="atualizarInterface()">
+                    </div>
                 </div>
-                <div id="lista" style="max-height: 300px; overflow-y: auto;"></div>
-                <div class="total">
-                    <span>Total</span>
-                    <span id="soma">R$ 0,00</span>
+                <div class="progress-container"><div id="progresso" class="progress-bar"></div></div>
+                
+                <div id="lista"></div>
+
+                <div style="display:flex; justify-content: space-between; font-weight:800; margin-top:15px; padding-top:15px; border-top:1px solid #eee;">
+                    <span>Total Acumulado</span>
+                    <span id="soma" style="color:var(--primary)">R$ 0,00</span>
                 </div>
             </div>
         </section>
 
         <section id="aba-historico" class="content-section">
             <div class="card">
-                <h3 style="margin-bottom: 20px;">Orçamento Diário</h3>
-                <div id="historico-agrupado"></div>
+                <h3 style="margin-bottom: 20px;">Fechamento Semanal</h3>
+                <div id="historico-semanal"></div>
             </div>
         </section>
 
         <nav class="nav-tabs">
-            <div class="tab-item active" onclick="mudarAba('aba-registro', this)">
-                <span>🏠</span><span>Início</span>
-            </div>
-            <div class="tab-item" onclick="mudarAba('aba-historico', this)">
-                <span>📊</span><span>Histórico</span>
-            </div>
+            <div class="tab-item active" onclick="mudarAba('aba-registro', this)"><span>🏠</span><span>INÍCIO</span></div>
+            <div class="tab-item" onclick="mudarAba('aba-historico', this)"><span>📊</span><span>HISTÓRICO</span></div>
         </nav>
     </div>
 
     <script>
         let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
-        const metaSemanal = 1000;
+        let metaSalva = localStorage.getItem('meta-orcamento') || "1000";
+        document.getElementById('meta-valor').value = metaSalva;
+
         const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
         function mudarAba(id, el) {
@@ -143,73 +140,22 @@
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
-            if(id === 'aba-historico') renderizarHistoricoAgrupado();
-        }
-
-        const btnVoz = document.getElementById('btn-voz');
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'pt-BR';
-            recognition.interimResults = false;
-            recognition.continuous = false;
-
-            btnVoz.onclick = () => {
-                try {
-                    recognition.start();
-                    btnVoz.innerText = "⏳ Ouvindo...";
-                    btnVoz.classList.add('ouvindo');
-                    if (navigator.vibrate) navigator.vibrate(50); // Vibra ao iniciar
-                } catch(e) { recognition.stop(); }
-            };
-
-            recognition.onresult = (e) => {
-                const texto = e.results[0][0].transcript.toLowerCase();
-                processarComandoVoz(texto);
-            };
-
-            recognition.onend = () => {
-                btnVoz.innerText = "🎤 Falar Gasto";
-                btnVoz.classList.remove('ouvindo');
-            };
-        }
-
-        function processarComandoVoz(texto) {
-            // Regex melhorada para capturar o valor
-            const matchValor = texto.match(/\d+([.,]\d+)?/);
-            if (matchValor) {
-                let v = matchValor[0].replace(',', '.');
-                let d = texto.replace(matchValor[0], '')
-                             .replace(/reais|real|no|na|em|com|de|o/g, '')
-                             .trim();
-
-                document.getElementById('valor').value = v;
-                document.getElementById('desc').value = d.charAt(0).toUpperCase() + d.slice(1);
-                
-                // SALVAMENTO AUTOMÁTICO APÓS 1.2 SEGUNDOS
-                btnVoz.innerText = "✅ Entendido! Salvando...";
-                setTimeout(() => {
-                    adicionarGasto();
-                    btnVoz.innerText = "🎤 Falar Gasto";
-                }, 1200);
-            }
+            if(id === 'aba-historico') renderizarHistoricoSemanal();
         }
 
         function adicionarGasto() {
             const v = document.getElementById('valor');
             const d = document.getElementById('desc');
-            const valorVal = parseFloat(v.value);
-            const descVal = d.value.trim();
+            if (!v.value) return;
 
-            if (!valorVal || descVal === "") return;
-
+            const agora = new Date();
             const novo = {
                 id: Date.now(),
-                dataFull: new Date().toLocaleDateString('pt-BR'),
-                diaNome: diasSemana[new Date().getDay()],
-                valor: valorVal,
-                desc: descVal
+                data: agora.toLocaleDateString('pt-BR'),
+                diaNome: diasSemana[agora.getDay()],
+                valor: parseFloat(v.value),
+                desc: d.value || "Gasto Geral",
+                timestamp: agora.getTime()
             };
 
             gastos.unshift(novo);
@@ -220,73 +166,77 @@
         function excluirGasto(id) {
             gastos = gastos.filter(g => g.id !== id);
             atualizarInterface();
-            renderizarHistoricoAgrupado();
-        }
-
-        function limparTudo() {
-            if(confirm("Deseja apagar tudo?")) {
-                gastos = [];
-                atualizarInterface();
-                renderizarHistoricoAgrupado();
-            }
         }
 
         function atualizarInterface() {
             const lista = document.getElementById('lista');
-            let total = 0;
+            const metaInput = document.getElementById('meta-valor');
+            let totalGeral = 0;
+            
             lista.innerHTML = '';
+            localStorage.setItem('meta-orcamento', metaInput.value);
 
+            // Agora mostramos TODOS os gastos, mas com a barra de rolagem do CSS
             gastos.forEach(g => {
-                total += g.valor;
                 lista.innerHTML += `
                     <div class="gasto-item">
-                        <div>
-                            <strong style="font-size: 0.7rem; color: var(--primary)">${g.diaNome} (${g.dataFull})</strong><br>
-                            <span>${g.desc}</span>
+                        <div class="gasto-info">
+                            <span class="gasto-label-dia">${g.diaNome}</span>
+                            <span class="gasto-desc">${g.desc}</span>
+                            <span class="gasto-valor">R$ ${g.valor.toFixed(2)}</span>
                         </div>
-                        <div style="display:flex; align-items:center">
-                            <span style="font-weight:600">R$ ${g.valor.toFixed(2)}</span>
-                            <button class="btn-del" onclick="excluirGasto(${g.id})">&times;</button>
-                        </div>
+                        <button class="btn-del" onclick="excluirGasto(${g.id})">&times;</button>
                     </div>`;
             });
 
-            document.getElementById('soma').innerText = `R$ ${total.toFixed(2)}`;
-            const perc = Math.min((total / metaSemanal) * 100, 100);
+            gastos.forEach(g => totalGeral += g.valor);
+            document.getElementById('soma').innerText = `R$ ${totalGeral.toFixed(2)}`;
+            
+            const meta = parseFloat(metaInput.value) || 1;
+            const perc = Math.min((totalGeral / meta) * 100, 100);
             const barra = document.getElementById('progresso');
             barra.style.width = perc + '%';
-            barra.style.background = total > metaSemanal ? 'var(--danger)' : 'var(--success)';
-            
+            barra.style.background = totalGeral > meta ? 'var(--danger)' : 'var(--success)';
+
             localStorage.setItem('gastos', JSON.stringify(gastos));
         }
 
-        function renderizarHistoricoAgrupado() {
-            const container = document.getElementById('historico-agrupado');
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+        }
+
+        function renderizarHistoricoSemanal() {
+            const container = document.getElementById('historico-semanal');
             container.innerHTML = '';
-            const grupos = {};
+            const semanas = {};
+
             gastos.forEach(g => {
-                const chaveData = g.dataFull;
-                if (!grupos[chaveData]) {
-                    grupos[chaveData] = { itens: [], somaDia: 0, nomeDia: g.diaNome };
-                }
-                grupos[chaveData].itens.push(g);
-                grupos[chaveData].somaDia += g.valor;
+                const dataObj = new Date(g.timestamp);
+                const semID = `Semana ${getWeekNumber(dataObj)} - ${dataObj.getFullYear()}`;
+                if (!semanas[semID]) semanas[semID] = { itens: [], total: 0 };
+                semanas[semID].itens.push(g);
+                semanas[semID].total += g.valor;
             });
 
-            for (const data in grupos) {
-                const grupo = grupos[data];
-                let itensHtml = grupo.itens.map(i => `
-                    <div class="gasto-item" style="background: white; border: 1px solid #f1f5f9; margin-bottom: 5px;">
-                        <span>${i.desc}</span>
-                        <strong>R$ ${i.valor.toFixed(2)}</strong>
+            for (const sem in semanas) {
+                let itensHtml = semanas[sem].itens.map(i => `
+                    <div class="gasto-item" style="background:white; margin-bottom:8px; padding:12px;">
+                        <div class="gasto-info">
+                            <span class="gasto-label-dia">${i.data} (${i.diaNome})</span>
+                            <span class="gasto-desc">${i.desc}</span>
+                            <span class="gasto-valor">R$ ${i.valor.toFixed(2)}</span>
+                        </div>
                     </div>
                 `).join('');
 
                 container.innerHTML += `
-                    <div class="dia-grupo">
-                        <div class="dia-titulo">
-                            <span>${grupo.nomeDia}, ${data}</span>
-                            <span style="color:var(--danger)">R$ ${grupo.somaDia.toFixed(2)}</span>
+                    <div class="semana-grupo">
+                        <div class="semana-header">
+                            <span>${sem}</span>
+                            <span>Total: R$ ${semanas[sem].total.toFixed(2)}</span>
                         </div>
                         ${itensHtml}
                     </div>
@@ -294,10 +244,10 @@
             }
         }
 
-        const agora = new Date();
-        const nomeMes = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(agora);
-        document.getElementById('mes-atual-topo').innerText = nomeMes + " " + agora.getFullYear();
-        document.getElementById('data-atual-box').innerText = diasSemana[agora.getDay()];
+        const dataHoje = new Date();
+        document.getElementById('dia-semana-topo').innerText = diasSemana[dataHoje.getDay()];
+        const mesAno = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(dataHoje);
+        document.getElementById('mes-atual-topo').innerText = mesAno;
         atualizarInterface();
     </script>
 </body>
