@@ -38,14 +38,7 @@
         .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-weight: 700; cursor: pointer; margin-top: 8px; font-size: 1rem; }
         #btn-voz { background: var(--warning); display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
         
-        /* AJUSTE: BARRA DE ROLAGEM NA LISTA */
-        #lista { 
-            max-height: 320px; /* Tamanho fixo do card */
-            overflow-y: auto;  /* Ativa o scroll */
-            padding-right: 5px;
-        }
-
-        /* Estilização da barra de rolagem para ficar discreta */
+        #lista { max-height: 320px; overflow-y: auto; padding-right: 5px; }
         #lista::-webkit-scrollbar { width: 4px; }
         #lista::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 
@@ -63,6 +56,9 @@
         /* Estilo do Fechamento Semanal */
         .semana-grupo { margin-bottom: 25px; }
         .semana-header { background: var(--primary); color: white; padding: 12px 18px; border-radius: 16px; font-weight: 800; font-size: 0.85rem; display: flex; justify-content: space-between; margin-bottom: 15px; }
+
+        /* BOTÃO LIMPAR HISTÓRICO */
+        .btn-limpar-hist { background: #fee2e2; color: var(--danger); border: none; padding: 10px; border-radius: 12px; width: 100%; font-weight: 800; font-size: 0.7rem; cursor: pointer; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
 
         .nav-tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px 15px 30px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 1000; }
         .tab-item { cursor: pointer; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 5px; }
@@ -87,11 +83,11 @@
                 <div class="card-header-flex">
                     <h3>Novo Gasto</h3>
                     <span class="badge-dia" id="dia-semana-topo">...</span>
+            
                 </div>
-                
-                 <input type="text" id="desc" placeholder="O que você comprou?">
+                <input type="text" id="desc" placeholder="O que você comprou?">
                 <input type="number" id="valor" placeholder="R$ 0,00" inputmode="decimal">
-               
+                
                 <button id="btn-voz" class="btn">🎤 Falar Gasto</button>
                 <button class="btn" onclick="adicionarGasto()">Salvar Gasto</button>
             </div>
@@ -105,9 +101,7 @@
                     </div>
                 </div>
                 <div class="progress-container"><div id="progresso" class="progress-bar"></div></div>
-                
                 <div id="lista"></div>
-
                 <div style="display:flex; justify-content: space-between; font-weight:800; margin-top:15px; padding-top:15px; border-top:1px solid #eee;">
                     <span>Total Acumulado</span>
                     <span id="soma" style="color:var(--primary)">R$ 0,00</span>
@@ -118,6 +112,9 @@
         <section id="aba-historico" class="content-section">
             <div class="card">
                 <h3 style="margin-bottom: 20px;">Fechamento Semanal</h3>
+                
+                <button class="btn-limpar-hist" onclick="limparTudo()">🗑️ Limpar Todo Histórico</button>
+                
                 <div id="historico-semanal"></div>
             </div>
         </section>
@@ -168,6 +165,16 @@
             atualizarInterface();
         }
 
+        // Função para limpar TUDO
+        function limparTudo() {
+            if(confirm("Isso apagará todos os gastos salvos. Deseja continuar?")) {
+                gastos = [];
+                localStorage.setItem('gastos', JSON.stringify(gastos));
+                atualizarInterface();
+                renderizarHistoricoSemanal();
+            }
+        }
+
         function atualizarInterface() {
             const lista = document.getElementById('lista');
             const metaInput = document.getElementById('meta-valor');
@@ -176,7 +183,6 @@
             lista.innerHTML = '';
             localStorage.setItem('meta-orcamento', metaInput.value);
 
-            // Agora mostramos TODOS os gastos, mas com a barra de rolagem do CSS
             gastos.forEach(g => {
                 lista.innerHTML += `
                     <div class="gasto-item">
@@ -211,8 +217,12 @@
         function renderizarHistoricoSemanal() {
             const container = document.getElementById('historico-semanal');
             container.innerHTML = '';
-            const semanas = {};
+            if (gastos.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin-top:20px;">Nenhum gasto registrado.</p>';
+                return;
+            }
 
+            const semanas = {};
             gastos.forEach(g => {
                 const dataObj = new Date(g.timestamp);
                 const semID = `Semana ${getWeekNumber(dataObj)} - ${dataObj.getFullYear()}`;
