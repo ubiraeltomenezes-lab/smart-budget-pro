@@ -37,7 +37,14 @@
 
         .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-weight: 700; cursor: pointer; margin-top: 8px; font-size: 1rem; }
         #btn-voz { background: var(--warning); display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
+        #btn-voz.escutando { background: var(--danger); animation: pulse 1.5s infinite; }
         
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
         #lista { max-height: 320px; overflow-y: auto; padding-right: 5px; }
         #lista::-webkit-scrollbar { width: 4px; }
         #lista::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
@@ -53,11 +60,9 @@
 
         .btn-del { color: #cbd5e1; background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 10px; }
 
-        /* Estilo do Fechamento Semanal */
         .semana-grupo { margin-bottom: 25px; }
         .semana-header { background: var(--primary); color: white; padding: 12px 18px; border-radius: 16px; font-weight: 800; font-size: 0.85rem; display: flex; justify-content: space-between; margin-bottom: 15px; }
 
-        /* BOTÃO LIMPAR HISTÓRICO */
         .btn-limpar-hist { background: #fee2e2; color: var(--danger); border: none; padding: 10px; border-radius: 12px; width: 100%; font-weight: 800; font-size: 0.7rem; cursor: pointer; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
 
         .nav-tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px 15px 30px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 1000; }
@@ -83,7 +88,6 @@
                 <div class="card-header-flex">
                     <h3>Novo Gasto</h3>
                     <span class="badge-dia" id="dia-semana-topo">...</span>
-            
                 </div>
                 <input type="text" id="desc" placeholder="O que você comprou?">
                 <input type="number" id="valor" placeholder="R$ 0,00" inputmode="decimal">
@@ -94,7 +98,7 @@
 
             <div class="card">
                 <div class="meta-container">
-                    <h3>Gastos Recentes</h3>
+                    <h3>Gastos Recentess</h3>
                     <div class="meta-edit">
                         <span>LIMITE: R$</span>
                         <input type="number" id="meta-valor" value="1000" onchange="atualizarInterface()">
@@ -112,9 +116,7 @@
         <section id="aba-historico" class="content-section">
             <div class="card">
                 <h3 style="margin-bottom: 20px;">Fechamento Semanal</h3>
-                
                 <button class="btn-limpar-hist" onclick="limparTudo()">🗑️ Limpar Todo Histórico</button>
-                
                 <div id="historico-semanal"></div>
             </div>
         </section>
@@ -165,7 +167,6 @@
             atualizarInterface();
         }
 
-        // Função para limpar TUDO
         function limparTudo() {
             if(confirm("Isso apagará todos os gastos salvos. Deseja continuar?")) {
                 gastos = [];
@@ -184,6 +185,7 @@
             localStorage.setItem('meta-orcamento', metaInput.value);
 
             gastos.forEach(g => {
+                totalGeral += g.valor; // Calculando no mesmo loop para melhorar performance
                 lista.innerHTML += `
                     <div class="gasto-item">
                         <div class="gasto-info">
@@ -195,7 +197,6 @@
                     </div>`;
             });
 
-            gastos.forEach(g => totalGeral += g.valor);
             document.getElementById('soma').innerText = `R$ ${totalGeral.toFixed(2)}`;
             
             const meta = parseFloat(metaInput.value) || 1;
@@ -254,6 +255,89 @@
             }
         }
 
+        // ================= IMPLANTAÇÃO DO COMANDO DE VOZ =================
+        const btnVoz = document.getElementById('btn-voz');
+        
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            
+            recognition.lang = 'pt-BR';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            btnVoz.addEventListener('click', () => {
+                if (btnVoz.classList.contains('escutando')) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            });
+
+            recognition.onstart = () => {
+                btnVoz.classList.add('escutando');
+                btnVoz.innerHTML = '🛑 Ouvindo... Fale algo como "Mercado 50 reais"';
+            };
+
+            recognition.onend = () => {
+                btnVoz.classList.remove('escutando');
+                btnVoz.innerHTML = '🎤 Falar Gasto';
+            };
+
+            recognition.onresult = (event) => {
+                const texto = event.results[0][0].transcript.toLowerCase();
+                processarVoz(texto);
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Erro no reconhecimento de voz: ", event.error);
+                alert("Não consegui te ouvir direito. Tente novamente!");
+            };
+        } else {
+            btnVoz.style.display = 'none';
+            console.log("Reconhecimento de voz não suportado neste navegador.");
+        }
+
+        function processarVoz(frase) {
+            // Expressão regular para capturar números (ex: 50, 23.50, 1500,00)
+            // Procura por números seguidos ou precedidos de cifrões/palavras como reais
+            const regexNumero = /([\d.,]+)/g;
+            const numerosEncontrados = frase.match(regexNumero);
+
+            if (!numerosEncontrados) {
+                alert("Diga a descrição e o valor. Exemplo: 'Padaria 12 reais'");
+                return;
+            }
+
+            // Pega o último ou principal número encontrado na frase e limpa a formatação brasileira
+            let valorTexto = numerosEncontrados[numerosEncontrados.length - 1];
+            valorTexto = valorTexto.replace('.', '').replace(',', '.');
+            const valorDecimal = parseFloat(valorTexto);
+
+            if (isNaN(valorDecimal)) {
+                alert("Não consegui entender o valor digitado. Tente dizer 'R$ 20' ou '50 reais'");
+                return;
+            }
+
+            // Remove o valor numérico e palavras de conexão da frase para extrair a descrição
+            let descricao = frase
+                .replace(numerosEncontrados[numerosEncontrados.length - 1], '')
+                .replace(/reais|real|r\$/g, '')
+                .replace(/\b(de|da|com|em|no|na)\b/g, '')
+                .trim();
+
+            // Capitaliza a primeira letra da descrição
+            descricao = descricao.charAt(0).toUpperCase() + descricao.slice(1);
+
+            // Preenche os inputs com os dados interpretados
+            document.getElementById('desc').value = descricao || "Gasto por Voz";
+            document.getElementById('valor').value = valorDecimal.toFixed(2);
+            
+            // Opcional: Salva o gasto automaticamente após entender o comando
+            adicionarGasto();
+        }
+
+        // Inicialização padrão da interface
         const dataHoje = new Date();
         document.getElementById('dia-semana-topo').innerText = diasSemana[dataHoje.getDay()];
         const mesAno = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(dataHoje);
