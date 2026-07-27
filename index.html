@@ -32,6 +32,42 @@
         h3 { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
         .badge-dia { background: var(--primary-light); color: var(--primary); padding: 4px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; }
 
+        /* Categorias Rápidas */
+        .categorias-rapidas {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            scroll-behavior: smooth;
+        }
+        .categorias-rapidas::-webkit-scrollbar { height: 4px; }
+        .categorias-rapidas::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .btn-categoria {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .btn-categoria:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-categoria:active {
+            transform: scale(0.95);
+        }
+
         input { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 14px; font-size: 1rem; outline: none; background: #fff; margin-bottom: 12px; }
         input:focus { border-color: var(--primary); }
 
@@ -52,16 +88,13 @@
         .gasto-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 18px; background: #f8fafc; margin-bottom: 10px; border: 1px solid #f1f5f9; }
         .gasto-info { display: flex; flex-direction: column; }
         .gasto-label-dia { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
-        .gasto-desc { font-weight: 600; color: var(--text-main); font-size: 1rem; line-height: 1.2; text-transform: lowercase; }
+        .gasto-desc { font-weight: 600; color: var(--text-main); font-size: 1rem; line-height: 1.2; text-transform: capitalize; }
         .gasto-valor { font-weight: 800; color: var(--primary); font-size: 0.95rem; margin-top: 2px; }
 
         .progress-container { background: #e2e8f0; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
         .progress-bar { background: var(--success); height: 100%; width: 0%; transition: 0.8s; }
 
         .btn-del { color: #cbd5e1; background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 10px; }
-
-        .semana-grupo { margin-bottom: 25px; }
-        .semana-header { background: var(--primary); color: white; padding: 12px 18px; border-radius: 16px; font-weight: 800; font-size: 0.85rem; display: flex; justify-content: space-between; margin-bottom: 15px; }
 
         .btn-limpar-hist { background: #fee2e2; color: var(--danger); border: none; padding: 10px; border-radius: 12px; width: 100%; font-weight: 800; font-size: 0.7rem; cursor: pointer; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -83,12 +116,25 @@
             <div id="mes-atual-topo">...</div>
         </div>
 
+        <!-- ABA REGISTRO / INÍCIO -->
         <section id="aba-registro" class="content-section active">
             <div class="card">
                 <div class="card-header-flex">
                     <h3>Novo Gasto</h3>
                     <span class="badge-dia" id="dia-semana-topo">...</span>
                 </div>
+
+                <!-- Botões de tags/categorias rápidas -->
+                <div class="categorias-rapidas">
+                    <button class="btn-categoria" onclick="selecionarCategoria('🛒 Mercado')">🛒 Mercado</button>
+                    <button class="btn-categoria" onclick="selecionarCategoria('🥖 Padaria')">🥖 Padaria</button>
+                    <button class="btn-categoria" onclick="selecionarCategoria('🍔 iFood')">🍔 iFood</button>
+                    <button class="btn-categoria" onclick="selecionarCategoria('🚗 Uber')">🚗 Uber</button>
+                    <button class="btn-categoria" onclick="selecionarCategoria('👤 Ana')">👤 Ana</button>
+                    <button class="btn-categoria" onclick="selecionarCategoria('💛 Doação')">💛 Doação</button>
+                    <button class="btn-categoria" onclick="selecionarCategoria('🎉 Lazer')">🎉 Lazer</button>
+                </div>
+
                 <input type="text" id="desc" placeholder="O que você comprou?">
                 <input type="number" id="valor" placeholder="R$ 0,00" inputmode="decimal">
                 
@@ -98,7 +144,7 @@
 
             <div class="card">
                 <div class="meta-container">
-                    <h3>Gastos Recentess</h3>
+                    <h3>Gastos Recentes</h3>
                     <div class="meta-edit">
                         <span>LIMITE: R$</span>
                         <input type="number" id="meta-valor" value="1000" onchange="atualizarInterface()">
@@ -113,14 +159,16 @@
             </div>
         </section>
 
+        <!-- ABA HISTÓRICO -->
         <section id="aba-historico" class="content-section">
             <div class="card">
-                <h3 style="margin-bottom: 20px;">Fechamento Semanal</h3>
+                <h3 style="margin-bottom: 20px;">Resumo por Tag / Categoria</h3>
                 <button class="btn-limpar-hist" onclick="limparTudo()">🗑️ Limpar Todo Histórico</button>
                 <div id="historico-semanal"></div>
             </div>
         </section>
 
+        <!-- NAVEGAÇÃO -->
         <nav class="nav-tabs">
             <div class="tab-item active" onclick="mudarAba('aba-registro', this)"><span>🏠</span><span>INÍCIO</span></div>
             <div class="tab-item" onclick="mudarAba('aba-historico', this)"><span>📊</span><span>HISTÓRICO</span></div>
@@ -134,12 +182,21 @@
 
         const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
+        // Selecionar botão de tag
+        function selecionarCategoria(nome) {
+            const descInput = document.getElementById('desc');
+            const valorInput = document.getElementById('valor');
+            
+            descInput.value = nome;
+            valorInput.focus();
+        }
+
         function mudarAba(id, el) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
-            if(id === 'aba-historico') renderizarHistoricoSemanal();
+            if(id === 'aba-historico') renderizarHistoricoAgrupado();
         }
 
         function adicionarGasto() {
@@ -153,7 +210,7 @@
                 data: agora.toLocaleDateString('pt-BR'),
                 diaNome: diasSemana[agora.getDay()],
                 valor: parseFloat(v.value),
-                desc: d.value || "Gasto Geral",
+                desc: d.value.trim() || "Outros",
                 timestamp: agora.getTime()
             };
 
@@ -172,7 +229,7 @@
                 gastos = [];
                 localStorage.setItem('gastos', JSON.stringify(gastos));
                 atualizarInterface();
-                renderizarHistoricoSemanal();
+                renderizarHistoricoAgrupado();
             }
         }
 
@@ -185,11 +242,11 @@
             localStorage.setItem('meta-orcamento', metaInput.value);
 
             gastos.forEach(g => {
-                totalGeral += g.valor; // Calculando no mesmo loop para melhorar performance
+                totalGeral += g.valor;
                 lista.innerHTML += `
                     <div class="gasto-item">
                         <div class="gasto-info">
-                            <span class="gasto-label-dia">${g.diaNome}</span>
+                            <span class="gasto-label-dia">${g.diaNome} - ${g.data}</span>
                             <span class="gasto-desc">${g.desc}</span>
                             <span class="gasto-valor">R$ ${g.valor.toFixed(2)}</span>
                         </div>
@@ -208,54 +265,42 @@
             localStorage.setItem('gastos', JSON.stringify(gastos));
         }
 
-        function getWeekNumber(d) {
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
-            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-            return Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
-        }
-
-        function renderizarHistoricoSemanal() {
+        // AGRUPA OS VALORES DAS TAGS NO HISTÓRICO
+        function renderizarHistoricoAgrupado() {
             const container = document.getElementById('historico-semanal');
             container.innerHTML = '';
+            
             if (gastos.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin-top:20px;">Nenhum gasto registrado.</p>';
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.88rem; margin-top:20px;">Nenhum gasto registrado ainda.</p>';
                 return;
             }
 
-            const semanas = {};
+            // Agrupa por Tag/Descrição e soma
+            const categorias = {};
             gastos.forEach(g => {
-                const dataObj = new Date(g.timestamp);
-                const semID = `Semana ${getWeekNumber(dataObj)} - ${dataObj.getFullYear()}`;
-                if (!semanas[semID]) semanas[semID] = { itens: [], total: 0 };
-                semanas[semID].itens.push(g);
-                semanas[semID].total += g.valor;
+                const tag = g.desc;
+                if (!categorias[tag]) {
+                    categorias[tag] = { total: 0, qtd: 0 };
+                }
+                categorias[tag].total += g.valor;
+                categorias[tag].qtd += 1;
             });
 
-            for (const sem in semanas) {
-                let itensHtml = semanas[sem].itens.map(i => `
-                    <div class="gasto-item" style="background:white; margin-bottom:8px; padding:12px;">
-                        <div class="gasto-info">
-                            <span class="gasto-label-dia">${i.data} (${i.diaNome})</span>
-                            <span class="gasto-desc">${i.desc}</span>
-                            <span class="gasto-valor">R$ ${i.valor.toFixed(2)}</span>
-                        </div>
-                    </div>
-                `).join('');
-
+            // Renderiza as somas agrupadas
+            for (const tag in categorias) {
                 container.innerHTML += `
-                    <div class="semana-grupo">
-                        <div class="semana-header">
-                            <span>${sem}</span>
-                            <span>Total: R$ ${semanas[sem].total.toFixed(2)}</span>
+                    <div class="gasto-item" style="background:#fff;">
+                        <div class="gasto-info">
+                            <span class="gasto-desc">${tag}</span>
+                            <span class="gasto-label-dia">${categorias[tag].qtd} lançamento(s)</span>
                         </div>
-                        ${itensHtml}
+                        <span class="gasto-valor" style="font-size:1.1rem; color:var(--primary);">R$ ${categorias[tag].total.toFixed(2)}</span>
                     </div>
                 `;
             }
         }
 
-        // ================= IMPLANTAÇÃO DO COMANDO DE VOZ =================
+        // ================= RECONHECIMENTO DE VOZ =================
         const btnVoz = document.getElementById('btn-voz');
         
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -295,12 +340,9 @@
             };
         } else {
             btnVoz.style.display = 'none';
-            console.log("Reconhecimento de voz não suportado neste navegador.");
         }
 
         function processarVoz(frase) {
-            // Expressão regular para capturar números (ex: 50, 23.50, 1500,00)
-            // Procura por números seguidos ou precedidos de cifrões/palavras como reais
             const regexNumero = /([\d.,]+)/g;
             const numerosEncontrados = frase.match(regexNumero);
 
@@ -309,35 +351,30 @@
                 return;
             }
 
-            // Pega o último ou principal número encontrado na frase e limpa a formatação brasileira
             let valorTexto = numerosEncontrados[numerosEncontrados.length - 1];
             valorTexto = valorTexto.replace('.', '').replace(',', '.');
             const valorDecimal = parseFloat(valorTexto);
 
             if (isNaN(valorDecimal)) {
-                alert("Não consegui entender o valor digitado. Tente dizer 'R$ 20' ou '50 reais'");
+                alert("Não consegui entender o valor. Tente dizer 'R$ 20' ou '50 reais'");
                 return;
             }
 
-            // Remove o valor numérico e palavras de conexão da frase para extrair a descrição
             let descricao = frase
                 .replace(numerosEncontrados[numerosEncontrados.length - 1], '')
                 .replace(/reais|real|r\$/g, '')
                 .replace(/\b(de|da|com|em|no|na)\b/g, '')
                 .trim();
 
-            // Capitaliza a primeira letra da descrição
             descricao = descricao.charAt(0).toUpperCase() + descricao.slice(1);
 
-            // Preenche os inputs com os dados interpretados
             document.getElementById('desc').value = descricao || "Gasto por Voz";
             document.getElementById('valor').value = valorDecimal.toFixed(2);
             
-            // Opcional: Salva o gasto automaticamente após entender o comando
             adicionarGasto();
         }
 
-        // Inicialização padrão da interface
+        // Inicialização
         const dataHoje = new Date();
         document.getElementById('dia-semana-topo').innerText = diasSemana[dataHoje.getDay()];
         const mesAno = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(dataHoje);
