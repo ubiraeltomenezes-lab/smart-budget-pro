@@ -107,6 +107,34 @@
         .meta-container { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); }
         .meta-edit { display: flex; align-items: center; gap: 5px; }
         .meta-edit input { width: 70px; padding: 4px 8px; margin: 0; font-size: 0.75rem; font-weight: 800; border: 1px solid #e2e8f0; border-radius: 6px; text-align: right; }
+
+        /* Estilos adicionados para agrupamento por semana */
+        .semana-bloco {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 18px;
+            border: 1px solid #e2e8f0;
+        }
+        .semana-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+        .semana-titulo {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+        .semana-total {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
     </style>
 </head>
 <body>
@@ -162,7 +190,7 @@
         <!-- ABA HISTÓRICO -->
         <section id="aba-historico" class="content-section">
             <div class="card">
-                <h3 style="margin-bottom: 20px;">Resumo por Tag / Categoria</h3>
+                <h3 style="margin-bottom: 20px;">Resumo Semanal por Tag</h3>
                 <button class="btn-limpar-hist" onclick="limparTudo()">🗑️ Limpar Todo Histórico</button>
                 <div id="historico-semanal"></div>
             </div>
@@ -265,7 +293,22 @@
             localStorage.setItem('gastos', JSON.stringify(gastos));
         }
 
-        // AGRUPA OS VALORES DAS TAGS NO HISTÓRICO
+        // Retorna o intervalo da semana (Domingo a Sábado) para um timestamp
+        function obterIntervaloSemana(timestamp) {
+            const data = new Date(timestamp);
+            const diaSemana = data.getDay(); // 0 = Domingo, 6 = Sábado
+            
+            const inicio = new Date(data);
+            inicio.setDate(data.getDate() - diaSemana);
+            
+            const fim = new Date(inicio);
+            fim.setDate(inicio.getDate() + 6);
+
+            const formatar = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            return `Semana (${formatar(inicio)} a ${formatar(fim)})`;
+        }
+
+        // AGRUPA OS VALORES DAS TAGS POR SEMANA NO HISTÓRICO
         function renderizarHistoricoAgrupado() {
             const container = document.getElementById('historico-semanal');
             container.innerHTML = '';
@@ -275,26 +318,54 @@
                 return;
             }
 
-            // Agrupa por Tag/Descrição e soma
-            const categorias = {};
+            // Agrupa primeiro por Semana e depois por Categoria/Tag
+            const semanas = {};
+
             gastos.forEach(g => {
+                const rotuloSemana = obterIntervaloSemana(g.timestamp || g.id);
                 const tag = g.desc;
-                if (!categorias[tag]) {
-                    categorias[tag] = { total: 0, qtd: 0 };
+
+                if (!semanas[rotuloSemana]) {
+                    semanas[rotuloSemana] = {
+                        totalSemana: 0,
+                        categorias: {}
+                    };
                 }
-                categorias[tag].total += g.valor;
-                categorias[tag].qtd += 1;
+
+                if (!semanas[rotuloSemana].categorias[tag]) {
+                    semanas[rotuloSemana].categorias[tag] = { total: 0, qtd: 0 };
+                }
+
+                semanas[rotuloSemana].totalSemana += g.valor;
+                semanas[rotuloSemana].categorias[tag].total += g.valor;
+                semanas[rotuloSemana].categorias[tag].qtd += 1;
             });
 
-            // Renderiza as somas agrupadas
-            for (const tag in categorias) {
-                container.innerHTML += `
-                    <div class="gasto-item" style="background:#fff;">
-                        <div class="gasto-info">
-                            <span class="gasto-desc">${tag}</span>
-                            <span class="gasto-label-dia">${categorias[tag].qtd} lançamento(s)</span>
+            // Renderiza cada grupo semanal
+            for (const rotuloSemana in semanas) {
+                const dadosSemana = semanas[rotuloSemana];
+
+                let htmlCategorias = '';
+                for (const tag in dadosSemana.categorias) {
+                    const cat = dadosSemana.categorias[tag];
+                    htmlCategorias += `
+                        <div class="gasto-item" style="background:#fff; margin-bottom:8px;">
+                            <div class="gasto-info">
+                                <span class="gasto-desc">${tag}</span>
+                                <span class="gasto-label-dia">${cat.qtd} lançamento(s)</span>
+                            </div>
+                            <span class="gasto-valor" style="font-size:1.0rem; color:var(--primary);">R$ ${cat.total.toFixed(2)}</span>
                         </div>
-                        <span class="gasto-valor" style="font-size:1.1rem; color:var(--primary);">R$ ${categorias[tag].total.toFixed(2)}</span>
+                    `;
+                }
+
+                container.innerHTML += `
+                    <div class="semana-bloco">
+                        <div class="semana-header">
+                            <span class="semana-titulo">📅 ${rotuloSemana}</span>
+                            <span class="semana-total">Total: R$ ${dadosSemana.totalSemana.toFixed(2)}</span>
+                        </div>
+                        ${htmlCategorias}
                     </div>
                 `;
             }
