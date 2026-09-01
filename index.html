@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Budget Pro - V4</title>
+    <title>Smart Budget Pro - Offline Version</title>
     
-    <!-- Suporte para funcionar como App (PWA / Offline) -->
+    <!-- Metas para funcionamento como aplicativo Offline -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#6366f1">
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1;
@@ -24,7 +23,14 @@
             --text-muted: #64748b;
         }
 
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        /* Usando fontes nativas do sistema para funcionar 100% sem internet */
+        * { 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+        }
+        
         body { background: var(--bg); color: var(--text-main); padding: 20px 20px 120px 20px; display: flex; justify-content: center; }
         .app { width: 100%; max-width: 480px; }
 
@@ -32,7 +38,6 @@
         h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 3px; }
         #mes-atual-topo { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
 
-        /* Badge de status Offline / Online */
         .status-conexao {
             display: inline-block;
             margin-top: 6px;
@@ -175,21 +180,21 @@
 
                 <!-- Botões de tags/categorias rápidas -->
                 <div class="categorias-rapidas">
-                    <button class="btn-categoria" onclick="selecionarCategoria('🛒 Mercado')">🛒 Mercado</button>
-                    <button class="btn-categoria" onclick="selecionarCategoria('🥖 Padaria')">🥖 Padaria</button>
-                    <button class="btn-categoria" onclick="selecionarCategoria('🍔 iFood')">🍔 iFood</button>
-                    <button class="btn-categoria" onclick="selecionarCategoria('🚗 Uber')">🚗 Uber</button>
-                    <button class="btn-categoria" onclick="selecionarCategoria('👤 Ana')">👤 Ana</button>
-                    <button class="btn-categoria" onclick="selecionarCategoria('💛 Doação')">💛 Doação</button>
-                    <button class="btn-categoria" onclick="selecionarCategoria('🎉 Lazer')">🎉 Lazer</button>
+                    <button class="btn-categoria" type="button" onclick="selecionarCategoria('🛒 Mercado')">🛒 Mercado</button>
+                    <button class="btn-categoria" type="button" onclick="selecionarCategoria('🥖 Padaria')">🥖 Padaria</button>
+                    <button class="btn-categoria" type="button" onclick="selecionarCategoria('🍔 iFood')">🍔 iFood</button>
+                    <button class="btn-categoria" type="button" onclick="selecionarCategoria('🚗 Uber')">🚗 Uber</button>
+                    <button class="btn-categoria" type="button" onclick="selecionarCategoria('👤 Ana')">👤 Ana</button>
+                    <button class="btn-categoria" type="button" onclick="selecionarCategoria('💛 Doação')">💛 Doação</button>
+                    <button class="btn-categoria" type="button" onclick="selecionarCategoria('🎉 Lazer')">🎉 Lazer</button>
                 </div>
 
                 <input type="text" id="desc" placeholder="O que você comprou?">
                 <input type="number" id="valor" placeholder="R$ 0,00" inputmode="decimal">
                 
-                <button id="btn-voz" class="btn">🎤 Falar Gasto</button>
-                <button class="btn" id="btn-salvar" onclick="adicionarOuAtualizarGasto()">Salvar Gasto</button>
-                <button class="btn btn-secundario" id="btn-cancelar-edit" onclick="cancelarEdicao()" style="display:none; margin-top:6px;">Cancelar Edição</button>
+                <button id="btn-voz" type="button" class="btn">🎤 Falar Gasto</button>
+                <button class="btn" type="button" id="btn-salvar" onclick="adicionarOuAtualizarGasto()">Salvar Gasto</button>
+                <button class="btn btn-secundario" type="button" id="btn-cancelar-edit" onclick="cancelarEdicao()" style="display:none; margin-top:6px;">Cancelar Edição</button>
             </div>
 
             <div class="card">
@@ -222,8 +227,8 @@
                 <div id="historico-semanal"></div>
 
                 <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 8px;">
-                    <button class="btn btn-secundario" onclick="exportarCSV()" style="font-size:0.8rem; padding:10px;">📊 Exportar para Excel (.CSV)</button>
-                    <button class="btn-limpar-hist" onclick="limparTudo()">🗑️ Limpar Todo Histórico</button>
+                    <button class="btn btn-secundario" type="button" onclick="exportarCSV()" style="font-size:0.8rem; padding:10px;">📊 Exportar para Excel (.CSV)</button>
+                    <button class="btn-limpar-hist" type="button" onclick="limparTudo()">🗑️ Limpar Todo Histórico</button>
                 </div>
             </div>
         </section>
@@ -236,21 +241,27 @@
     </div>
 
     <script>
-        let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+        // Leitura de dados salvos localmente
+        let gastos = [];
+        try {
+            gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+        } catch (e) {
+            gastos = [];
+        }
+
         let metaSalva = localStorage.getItem('meta-orcamento') || "1000";
         let idGastoEmEdicao = null;
 
         document.getElementById('meta-valor').value = metaSalva;
         const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
-        // monitoramento da conexão (Online/Offline)
         function atualizarStatusConexao() {
             const badge = document.getElementById('status-conexao');
             if (navigator.onLine) {
                 badge.innerText = '🟢 Online';
                 badge.className = 'status-conexao status-online';
             } else {
-                badge.innerText = '🔴 Offline (Salvo Localmente)';
+                badge.innerText = '🔴 Offline (Modo Local)';
                 badge.className = 'status-conexao status-offline';
             }
         }
@@ -274,10 +285,13 @@
         function adicionarOuAtualizarGasto() {
             const v = document.getElementById('valor');
             const d = document.getElementById('desc');
-            if (!v.value) return;
+            
+            if (!v.value || isNaN(parseFloat(v.value))) {
+                alert("Por favor, digite um valor válido.");
+                return;
+            }
 
             if (idGastoEmEdicao) {
-                // Modo Edição
                 gastos = gastos.map(g => {
                     if (g.id === idGastoEmEdicao) {
                         return { ...g, valor: parseFloat(v.value), desc: d.value.trim() || "Outros" };
@@ -286,7 +300,6 @@
                 });
                 cancelarEdicao();
             } else {
-                // Modo Novo Registro
                 const agora = new Date();
                 const novo = {
                     id: Date.now(),
@@ -358,8 +371,8 @@
                             <span class="gasto-valor">R$ ${g.valor.toFixed(2)}</span>
                         </div>
                         <div class="acoes-item">
-                            <button class="btn-acao" onclick="prepararEdicao(${g.id})" title="Editar">✏️</button>
-                            <button class="btn-acao" onclick="excluirGasto(${g.id})" title="Excluir">&times;</button>
+                            <button class="btn-acao" type="button" onclick="prepararEdicao(${g.id})" title="Editar">✏️</button>
+                            <button class="btn-acao" type="button" onclick="excluirGasto(${g.id})" title="Excluir">&times;</button>
                         </div>
                     </div>`;
             });
@@ -372,14 +385,16 @@
             barra.style.width = perc + '%';
             barra.style.background = totalGeral > meta ? 'var(--danger)' : 'var(--success)';
 
-            localStorage.setItem('gastos', JSON.stringify(gastos));
+            try {
+                localStorage.setItem('gastos', JSON.stringify(gastos));
+            } catch (e) {
+                console.error("Erro ao salvar no dispositivo:", e);
+            }
         }
 
-        // Calcula a Semana (Segunda a Domingo)
         function obterIntervaloSemana(timestamp) {
             const data = new Date(timestamp);
             const diaSemana = data.getDay(); // 0 = Dom, 1 = Seg, ..., 6 = Sab
-            
             const diasAteSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
             
             const inicioSegunda = new Date(data);
@@ -392,7 +407,6 @@
             return `Semana (${formatar(inicioSegunda)} a ${formatar(fimDomingo)})`;
         }
 
-        // HISTÓRICO COM SELETOR DE SEMANAS
         function carregarOpcoesSemanas() {
             const seletor = document.getElementById('seletor-semana');
             seletor.innerHTML = '';
@@ -423,7 +437,6 @@
             }
 
             const gastosDaSemana = gastos.filter(g => obterIntervaloSemana(g.timestamp || g.id) === semanaSelecionada);
-
             const categorias = {};
             let totalSemana = 0;
 
@@ -479,7 +492,7 @@
 
         function alternarDetalhes(id) {
             const el = document.getElementById(id);
-            el.classList.toggle('aberto');
+            if (el) el.classList.toggle('aberto');
         }
 
         function exportarCSV() {
@@ -502,10 +515,9 @@
             document.body.removeChild(link);
         }
 
-        // ================= RECONHECIMENTO DE VOZ =================
+        // ================= RECONHECIMENTO DE VOZ (Requer Conexão) =================
         const btnVoz = document.getElementById('btn-voz');
         
-        // Voz funciona apenas com conexão ativa
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
@@ -516,7 +528,7 @@
 
             btnVoz.addEventListener('click', () => {
                 if (!navigator.onLine) {
-                    alert("O reconhecimento por voz precisa de conexão com a internet para funcionar. Use a digitação manual enquanto estiver offline!");
+                    alert("A função de voz precisa de internet para processar o áudio. Por favor, digite o valor no campo manual.");
                     return;
                 }
                 if (btnVoz.classList.contains('escutando')) {
@@ -562,7 +574,7 @@
             const valorDecimal = parseFloat(valorTexto);
 
             if (isNaN(valorDecimal)) {
-                alert("Não consegui entender o valor. Tente dizer 'R$ 20' ou '50 reais'");
+                alert("Não consegui entender o valor.");
                 return;
             }
 
@@ -585,6 +597,7 @@
         document.getElementById('dia-semana-topo').innerText = diasSemana[dataHoje.getDay()];
         const mesAno = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(dataHoje);
         document.getElementById('mes-atual-topo').innerText = mesAno;
+        
         atualizarStatusConexao();
         atualizarInterface();
     </script>
