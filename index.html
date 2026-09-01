@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Budget Pro - V2</title>
+    <title>Smart Budget Pro - V4</title>
+    
+    <!-- Suporte para funcionar como App (PWA / Offline) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#6366f1">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -22,9 +28,22 @@
         body { background: var(--bg); color: var(--text-main); padding: 20px 20px 120px 20px; display: flex; justify-content: center; }
         .app { width: 100%; max-width: 480px; }
 
-        .header-area { text-align: center; margin-bottom: 25px; }
-        h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+        .header-area { text-align: center; margin-bottom: 20px; position: relative; }
+        h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 3px; }
         #mes-atual-topo { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Badge de status Offline / Online */
+        .status-conexao {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .status-online { background: #dcfce7; color: #15803d; }
+        .status-offline { background: #fee2e2; color: #b91c1c; }
 
         .card { background: var(--card); border-radius: 24px; padding: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 20px; }
         
@@ -64,14 +83,23 @@
             color: var(--primary);
             border-color: var(--primary);
         }
-        .btn-categoria:active {
-            transform: scale(0.95);
-        }
 
-        input { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 14px; font-size: 1rem; outline: none; background: #fff; margin-bottom: 12px; }
-        input:focus { border-color: var(--primary); }
+        input, select { 
+            width: 100%; 
+            padding: 14px; 
+            border: 1.5px solid #e2e8f0; 
+            border-radius: 14px; 
+            font-size: 1rem; 
+            outline: none; 
+            background: #fff; 
+            margin-bottom: 12px; 
+            color: var(--text-main);
+        }
+        input:focus, select:focus { border-color: var(--primary); }
 
         .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-weight: 700; cursor: pointer; margin-top: 8px; font-size: 1rem; }
+        .btn-secundario { background: #f1f5f9; color: var(--text-main); border: 1px solid #cbd5e1; }
+        
         #btn-voz { background: var(--warning); display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
         #btn-voz.escutando { background: var(--danger); animation: pulse 1.5s infinite; }
         
@@ -85,16 +113,27 @@
         #lista::-webkit-scrollbar { width: 4px; }
         #lista::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 
-        .gasto-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 18px; background: #f8fafc; margin-bottom: 10px; border: 1px solid #f1f5f9; }
-        .gasto-info { display: flex; flex-direction: column; }
+        .gasto-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 14px; 
+            border-radius: 18px; 
+            background: #f8fafc; 
+            margin-bottom: 10px; 
+            border: 1px solid #f1f5f9; 
+        }
+        .gasto-info { display: flex; flex-direction: column; flex-grow: 1; }
         .gasto-label-dia { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
-        .gasto-desc { font-weight: 600; color: var(--text-main); font-size: 1rem; line-height: 1.2; text-transform: capitalize; }
+        .gasto-desc { font-weight: 600; color: var(--text-main); font-size: 0.95rem; line-height: 1.2; text-transform: capitalize; }
         .gasto-valor { font-weight: 800; color: var(--primary); font-size: 0.95rem; margin-top: 2px; }
+
+        .acoes-item { display: flex; gap: 4px; align-items: center; }
+        .btn-acao { color: #94a3b8; background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 6px; border-radius: 8px; }
+        .btn-acao:hover { background: #e2e8f0; color: var(--text-main); }
 
         .progress-container { background: #e2e8f0; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
         .progress-bar { background: var(--success); height: 100%; width: 0%; transition: 0.8s; }
-
-        .btn-del { color: #cbd5e1; background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 10px; }
 
         .btn-limpar-hist { background: #fee2e2; color: var(--danger); border: none; padding: 10px; border-radius: 12px; width: 100%; font-weight: 800; font-size: 0.7rem; cursor: pointer; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -108,32 +147,14 @@
         .meta-edit { display: flex; align-items: center; gap: 5px; }
         .meta-edit input { width: 70px; padding: 4px 8px; margin: 0; font-size: 0.75rem; font-weight: 800; border: 1px solid #e2e8f0; border-radius: 6px; text-align: right; }
 
-        .semana-bloco {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 18px;
-            border: 1px solid #e2e8f0;
-        }
-        .semana-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
-            margin-bottom: 12px;
-        }
-        .semana-titulo {
-            font-size: 0.8rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-transform: uppercase;
-        }
-        .semana-total {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--text-main);
-        }
+        /* Estilos do Histórico */
+        .semana-bloco { background: #f8fafc; border-radius: 16px; padding: 15px; border: 1px solid #e2e8f0; margin-top: 15px; }
+        .categoria-expansivel { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 8px; overflow: hidden; }
+        .categoria-header { padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .categoria-detalhes { display: none; padding: 10px 12px; background: #fafafa; border-top: 1px dashed #e2e8f0; font-size: 0.85rem; }
+        .categoria-detalhes.aberto { display: block; }
+        .detalhe-linha { display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--text-muted); }
+        .detalhe-linha:last-child { margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -141,13 +162,14 @@
         <div class="header-area">
             <h1>Smart Budget</h1>
             <div id="mes-atual-topo">...</div>
+            <div id="status-conexao" class="status-conexao status-online">🟢 Online</div>
         </div>
 
         <!-- ABA REGISTRO / INÍCIO -->
         <section id="aba-registro" class="content-section active">
             <div class="card">
                 <div class="card-header-flex">
-                    <h3>Novo Gasto</h3>
+                    <h3 id="form-titulo">Novo Gasto</h3>
                     <span class="badge-dia" id="dia-semana-topo">...</span>
                 </div>
 
@@ -166,7 +188,8 @@
                 <input type="number" id="valor" placeholder="R$ 0,00" inputmode="decimal">
                 
                 <button id="btn-voz" class="btn">🎤 Falar Gasto</button>
-                <button class="btn" onclick="adicionarGasto()">Salvar Gasto</button>
+                <button class="btn" id="btn-salvar" onclick="adicionarOuAtualizarGasto()">Salvar Gasto</button>
+                <button class="btn btn-secundario" id="btn-cancelar-edit" onclick="cancelarEdicao()" style="display:none; margin-top:6px;">Cancelar Edição</button>
             </div>
 
             <div class="card">
@@ -189,9 +212,19 @@
         <!-- ABA HISTÓRICO -->
         <section id="aba-historico" class="content-section">
             <div class="card">
-                <h3 style="margin-bottom: 20px;">Resumo Semanal por Tag</h3>
-                <button class="btn-limpar-hist" onclick="limparTudo()">🗑️ Limpar Todo Histórico</button>
+                <h3 style="margin-bottom: 15px;">Filtrar Histórico</h3>
+                
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">SELECIONE A SEMANA:</label>
+                <select id="seletor-semana" onchange="renderizarHistoricoFiltrado()" style="margin-top: 5px;">
+                    <!-- Preenchido via JS -->
+                </select>
+
                 <div id="historico-semanal"></div>
+
+                <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn btn-secundario" onclick="exportarCSV()" style="font-size:0.8rem; padding:10px;">📊 Exportar para Excel (.CSV)</button>
+                    <button class="btn-limpar-hist" onclick="limparTudo()">🗑️ Limpar Todo Histórico</button>
+                </div>
             </div>
         </section>
 
@@ -205,17 +238,29 @@
     <script>
         let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
         let metaSalva = localStorage.getItem('meta-orcamento') || "1000";
-        document.getElementById('meta-valor').value = metaSalva;
+        let idGastoEmEdicao = null;
 
+        document.getElementById('meta-valor').value = metaSalva;
         const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
-        // Selecionar botão de tag
+        // monitoramento da conexão (Online/Offline)
+        function atualizarStatusConexao() {
+            const badge = document.getElementById('status-conexao');
+            if (navigator.onLine) {
+                badge.innerText = '🟢 Online';
+                badge.className = 'status-conexao status-online';
+            } else {
+                badge.innerText = '🔴 Offline (Salvo Localmente)';
+                badge.className = 'status-conexao status-offline';
+            }
+        }
+
+        window.addEventListener('online', atualizarStatusConexao);
+        window.addEventListener('offline', atualizarStatusConexao);
+
         function selecionarCategoria(nome) {
-            const descInput = document.getElementById('desc');
-            const valorInput = document.getElementById('valor');
-            
-            descInput.value = nome;
-            valorInput.focus();
+            document.getElementById('desc').value = nome;
+            document.getElementById('valor').focus();
         }
 
         function mudarAba(id, el) {
@@ -223,27 +268,62 @@
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
-            if(id === 'aba-historico') renderizarHistoricoAgrupado();
+            if(id === 'aba-historico') carregarOpcoesSemanas();
         }
 
-        function adicionarGasto() {
+        function adicionarOuAtualizarGasto() {
             const v = document.getElementById('valor');
             const d = document.getElementById('desc');
             if (!v.value) return;
 
-            const agora = new Date();
-            const novo = {
-                id: Date.now(),
-                data: agora.toLocaleDateString('pt-BR'),
-                diaNome: diasSemana[agora.getDay()],
-                valor: parseFloat(v.value),
-                desc: d.value.trim() || "Outros",
-                timestamp: agora.getTime()
-            };
+            if (idGastoEmEdicao) {
+                // Modo Edição
+                gastos = gastos.map(g => {
+                    if (g.id === idGastoEmEdicao) {
+                        return { ...g, valor: parseFloat(v.value), desc: d.value.trim() || "Outros" };
+                    }
+                    return g;
+                });
+                cancelarEdicao();
+            } else {
+                // Modo Novo Registro
+                const agora = new Date();
+                const novo = {
+                    id: Date.now(),
+                    data: agora.toLocaleDateString('pt-BR'),
+                    diaNome: diasSemana[agora.getDay()],
+                    valor: parseFloat(v.value),
+                    desc: d.value.trim() || "Outros",
+                    timestamp: agora.getTime()
+                };
+                gastos.unshift(novo);
+            }
 
-            gastos.unshift(novo);
             v.value = ''; d.value = '';
             atualizarInterface();
+        }
+
+        function prepararEdicao(id) {
+            const gasto = gastos.find(g => g.id === id);
+            if (!gasto) return;
+
+            idGastoEmEdicao = id;
+            document.getElementById('desc').value = gasto.desc;
+            document.getElementById('valor').value = gasto.valor;
+            
+            document.getElementById('form-titulo').innerText = "Editar Gasto";
+            document.getElementById('btn-salvar').innerText = "Atualizar Gasto";
+            document.getElementById('btn-cancelar-edit').style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelarEdicao() {
+            idGastoEmEdicao = null;
+            document.getElementById('desc').value = '';
+            document.getElementById('valor').value = '';
+            document.getElementById('form-titulo').innerText = "Novo Gasto";
+            document.getElementById('btn-salvar').innerText = "Salvar Gasto";
+            document.getElementById('btn-cancelar-edit').style.display = "none";
         }
 
         function excluirGasto(id) {
@@ -252,11 +332,11 @@
         }
 
         function limparTudo() {
-            if(confirm("Isso apagará todos os gastos salvos. Deseja continuar?")) {
+            if(confirm("Isso apagará todos os gastos salvos permanentemente. Deseja continuar?")) {
                 gastos = [];
                 localStorage.setItem('gastos', JSON.stringify(gastos));
                 atualizarInterface();
-                renderizarHistoricoAgrupado();
+                carregarOpcoesSemanas();
             }
         }
 
@@ -277,7 +357,10 @@
                             <span class="gasto-desc">${g.desc}</span>
                             <span class="gasto-valor">R$ ${g.valor.toFixed(2)}</span>
                         </div>
-                        <button class="btn-del" onclick="excluirGasto(${g.id})">&times;</button>
+                        <div class="acoes-item">
+                            <button class="btn-acao" onclick="prepararEdicao(${g.id})" title="Editar">✏️</button>
+                            <button class="btn-acao" onclick="excluirGasto(${g.id})" title="Excluir">&times;</button>
+                        </div>
                     </div>`;
             });
 
@@ -292,12 +375,11 @@
             localStorage.setItem('gastos', JSON.stringify(gastos));
         }
 
-        // Retorna o intervalo da semana (Segunda a Domingo) para um timestamp
+        // Calcula a Semana (Segunda a Domingo)
         function obterIntervaloSemana(timestamp) {
             const data = new Date(timestamp);
-            const diaSemana = data.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+            const diaSemana = data.getDay(); // 0 = Dom, 1 = Seg, ..., 6 = Sab
             
-            // Calcula os dias até a Segunda-feira anterior (se for Domingo [0], recua 6 dias)
             const diasAteSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
             
             const inicioSegunda = new Date(data);
@@ -310,72 +392,120 @@
             return `Semana (${formatar(inicioSegunda)} a ${formatar(fimDomingo)})`;
         }
 
-        // AGRUPA OS VALORES DAS TAGS POR SEMANA NO HISTÓRICO
-        function renderizarHistoricoAgrupado() {
-            const container = document.getElementById('historico-semanal');
-            container.innerHTML = '';
-            
+        // HISTÓRICO COM SELETOR DE SEMANAS
+        function carregarOpcoesSemanas() {
+            const seletor = document.getElementById('seletor-semana');
+            seletor.innerHTML = '';
+
             if (gastos.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.88rem; margin-top:20px;">Nenhum gasto registrado ainda.</p>';
+                seletor.innerHTML = '<option value="">Nenhum dado registrado</option>';
+                renderizarHistoricoFiltrado();
                 return;
             }
 
-            // Agrupa primeiro por Semana e depois por Categoria/Tag
-            const semanas = {};
+            const semanasUnicas = [...new Set(gastos.map(g => obterIntervaloSemana(g.timestamp || g.id)))];
 
-            gastos.forEach(g => {
-                const rotuloSemana = obterIntervaloSemana(g.timestamp || g.id);
-                const tag = g.desc;
-
-                if (!semanas[rotuloSemana]) {
-                    semanas[rotuloSemana] = {
-                        totalSemana: 0,
-                        categorias: {}
-                    };
-                }
-
-                if (!semanas[rotuloSemana].categorias[tag]) {
-                    semanas[rotuloSemana].categorias[tag] = { total: 0, qtd: 0 };
-                }
-
-                semanas[rotuloSemana].totalSemana += g.valor;
-                semanas[rotuloSemana].categorias[tag].total += g.valor;
-                semanas[rotuloSemana].categorias[tag].qtd += 1;
+            semanasUnicas.forEach(semana => {
+                seletor.innerHTML += `<option value="${semana}">${semana}</option>`;
             });
 
-            // Renderiza cada grupo semanal
-            for (const rotuloSemana in semanas) {
-                const dadosSemana = semanas[rotuloSemana];
+            renderizarHistoricoFiltrado();
+        }
 
-                let htmlCategorias = '';
-                for (const tag in dadosSemana.categorias) {
-                    const cat = dadosSemana.categorias[tag];
-                    htmlCategorias += `
-                        <div class="gasto-item" style="background:#fff; margin-bottom:8px;">
-                            <div class="gasto-info">
-                                <span class="gasto-desc">${tag}</span>
-                                <span class="gasto-label-dia">${cat.qtd} lançamento(s)</span>
-                            </div>
-                            <span class="gasto-valor" style="font-size:1.0rem; color:var(--primary);">R$ ${cat.total.toFixed(2)}</span>
-                        </div>
-                    `;
+        function renderizarHistoricoFiltrado() {
+            const container = document.getElementById('historico-semanal');
+            const semanaSelecionada = document.getElementById('seletor-semana').value;
+            container.innerHTML = '';
+
+            if (!semanaSelecionada || gastos.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.88rem; margin-top:20px;">Nenhum gasto nesta semana.</p>';
+                return;
+            }
+
+            const gastosDaSemana = gastos.filter(g => obterIntervaloSemana(g.timestamp || g.id) === semanaSelecionada);
+
+            const categorias = {};
+            let totalSemana = 0;
+
+            gastosDaSemana.forEach(g => {
+                totalSemana += g.valor;
+                if (!categorias[g.desc]) {
+                    categorias[g.desc] = { total: 0, itens: [] };
                 }
+                categorias[g.desc].total += g.valor;
+                categorias[g.desc].itens.push(g);
+            });
 
-                container.innerHTML += `
-                    <div class="semana-bloco">
-                        <div class="semana-header">
-                            <span class="semana-titulo">📅 ${rotuloSemana}</span>
-                            <span class="semana-total">Total: R$ ${dadosSemana.totalSemana.toFixed(2)}</span>
+            let htmlCategorias = '';
+            let index = 0;
+
+            for (const tag in categorias) {
+                index++;
+                const cat = categorias[tag];
+                
+                let htmlItensDetalhados = cat.itens.map(item => `
+                    <div class="detalhe-linha">
+                        <span>${item.diaNome} (${item.data})</span>
+                        <span style="font-weight:600; color:var(--text-main);">R$ ${item.valor.toFixed(2)}</span>
+                    </div>
+                `).join('');
+
+                htmlCategorias += `
+                    <div class="categoria-expansivel">
+                        <div class="categoria-header" onclick="alternarDetalhes('detalhe-${index}')">
+                            <div>
+                                <strong style="font-size:0.9rem;">${tag}</strong>
+                                <span style="font-size:0.75rem; color:var(--text-muted); display:block;">${cat.itens.length} compra(s)</span>
+                            </div>
+                            <span style="font-weight:800; color:var(--primary);">R$ ${cat.total.toFixed(2)} ▾</span>
                         </div>
-                        ${htmlCategorias}
+                        <div id="detalhe-${index}" class="categoria-detalhes">
+                            ${htmlItensDetalhados}
+                        </div>
                     </div>
                 `;
             }
+
+            container.innerHTML = `
+                <div class="semana-bloco">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.8rem; font-weight:800; color:var(--text-muted);">TOTAL DA SEMANA</span>
+                        <span style="font-size:1.1rem; font-weight:800; color:var(--primary);">R$ ${totalSemana.toFixed(2)}</span>
+                    </div>
+                    ${htmlCategorias}
+                </div>
+            `;
+        }
+
+        function alternarDetalhes(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('aberto');
+        }
+
+        function exportarCSV() {
+            if (gastos.length === 0) {
+                alert("Não há dados para exportar!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Data;Dia;Descricao;Valor (R$)\n";
+            gastos.forEach(g => {
+                csvContent += `${g.data};${g.diaNome};${g.desc};${g.valor.toFixed(2).replace('.', ',')}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `smart_budget_gastos_${new Date().toLocaleDateString('pt-BR')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // ================= RECONHECIMENTO DE VOZ =================
         const btnVoz = document.getElementById('btn-voz');
         
+        // Voz funciona apenas com conexão ativa
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
@@ -385,6 +515,10 @@
             recognition.maxAlternatives = 1;
 
             btnVoz.addEventListener('click', () => {
+                if (!navigator.onLine) {
+                    alert("O reconhecimento por voz precisa de conexão com a internet para funcionar. Use a digitação manual enquanto estiver offline!");
+                    return;
+                }
                 if (btnVoz.classList.contains('escutando')) {
                     recognition.stop();
                 } else {
@@ -408,7 +542,6 @@
             };
 
             recognition.onerror = (event) => {
-                console.error("Erro no reconhecimento de voz: ", event.error);
                 alert("Não consegui te ouvir direito. Tente novamente!");
             };
         } else {
@@ -444,7 +577,7 @@
             document.getElementById('desc').value = descricao || "Gasto por Voz";
             document.getElementById('valor').value = valorDecimal.toFixed(2);
             
-            adicionarGasto();
+            adicionarOuAtualizarGasto();
         }
 
         // Inicialização
@@ -452,6 +585,7 @@
         document.getElementById('dia-semana-topo').innerText = diasSemana[dataHoje.getDay()];
         const mesAno = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(dataHoje);
         document.getElementById('mes-atual-topo').innerText = mesAno;
+        atualizarStatusConexao();
         atualizarInterface();
     </script>
 </body>
